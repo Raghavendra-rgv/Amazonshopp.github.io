@@ -1,0 +1,359 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Amazon Products API
+  description: |
+      # About Us
+      ***Amazon*** is a open market product selling comapny.
+      Any website can list our products by usung our _APIs_.
+      Shipping & other logistics will be taken care by us.
+      Yoy will get on affiliate Commision for selling our products.
+      ## Categories Supported
+        - Mobiles
+          - RedMi
+          - Samsung
+          - Apple
+          - Google pixle
+        - Laptops
+        - Televisions
+        - Headphones
+  termsOfService: https://amazonshop.com//tos
+  contact:
+    name: Raghavendra Sanaboyina
+    email: raghavasanaboyina@amazon.com
+  license:
+    name: Amazon License
+    url: https://www.amazonshop.com/license/LICENSE-2.0.html
+servers:
+  - url: https://development.amazonshop-server.com/v1
+    description: Development server
+tags:    
+  - name: Categories
+    description: categories-related operations
+  - name: Products
+    description: Products-related operations
+  - name: Orders
+    description: Orders-realted operations
+    
+paths:
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: List all categories
+      description: Returns the list of categories supported by Amazon
+      parameters: 
+       - name: categoryId
+         in: query
+         required: true
+         schema:
+           type: integer
+           minimum: 100
+           maximum: 1000
+         examples: 
+           mobiles:
+            value: 101
+           laptops:
+            value: 103
+           headphones:
+            value: 104
+           televisions:
+            value: 105
+      responses: 
+        '200':
+          description: A list of categories
+          content: 
+            application/json:
+              schema:
+               type: array
+               items:
+                type: object
+                properties:
+                  categoriyId:
+                    type: integer
+                  name:
+                    type: string
+              examples:
+                all-categories-data:
+                  summary: Categories example data
+                  value:
+                    - categoryId: 101
+                      name: Mobiles
+                    - categoryId: 102
+                      name: laptops
+                    - categoryId: 103
+                      name: headphones
+                    - categoryId: 104
+                      name: Televsions
+                single-category-data:
+                  summary: single category example data
+                  value: 
+                    - categoryId: 101
+                      name: Mobiles
+  /categories/{categoryId}:
+    get:
+      tags:
+        - Categories 
+      summary: Return category deetails
+      description: Returns the category details from Amazon
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+           type: integer
+           minimum: 100
+           maximum: 1000
+          example: 102 
+      responses: 
+        '200':
+          description: return category deatails
+          content:
+            application/json:
+             schema:
+              type: object
+              properties: 
+                categoryId:
+                  type: integer
+                name:
+                  type: string
+  /products:
+    get:
+      tags:
+        - Products 
+      summary: List all products
+      description: Returns the list of products supported by Amazon
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+           type: integer
+           minimum: 100
+           maximum: 1000
+          example: 101
+      responses:
+        '200':
+          description: A list of products
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                 type: object
+                 properties:
+                  productId:
+                   type: integer
+                  name:
+                   type: string
+                  price:
+                   type: number
+                  categoryName:
+                   type: string
+                  quantity:
+                   type: integer
+              examples:
+                  products-data:
+                    summary: products example data
+                    value:
+                       - productId: 101
+                         name: Apple IPhone 13 Pro
+                         price: 111199.00
+                         categoryName: Mobiles
+                         quantity: 96
+                       - productId: 102
+                         name: Samsung S22 Ultra
+                         price: 129999
+                         categoryName: Mobiles
+                         quantity: 121
+                       - productId: 102
+                         name: Google pixle
+                         price: 99999.00
+                         categoryName: Mobiles
+                         quantity: 144   
+  /products/{productId}:
+    get:
+      tags:
+        - Products
+      summary: return product details
+      description: Returns the product details from Amazon
+      operationId: getProductDetails
+      parameters:
+       - name: productId
+         in: path
+         required: true
+         schema:
+          type: integer
+          minimum: 100
+          maximum: 1000
+         example: 101
+      responses:
+       '201':
+         description: Return product details
+         content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                   type: integer
+                  name:
+                   type: string
+                  price:
+                   type: number
+                  categoryName:
+                   type: string
+                  quantity:
+                   type: integer
+  /orders:
+    post:
+       tags:
+        - Orders
+       summary: Create Order
+       description: post Order deatils to Amazon for processing and shipping
+       operationId: saveOrderDetails
+       requestBody:
+        content:
+          application/json:
+           schema:
+            type: object
+            properties:
+             products:
+              type: array
+              items:
+                $ref: "#/components/schemas/Products"
+             address:
+              $ref: "#/components/schemas/Address"
+       responses:
+        '203':
+          description: Order details successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                   type: integer  
+                  
+                  
+    put:
+      tags:
+        - Orders
+      summary: Update Order
+      description: post Order deatils to Amazon for processing and shipping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                products:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Products"
+                address:
+                  $ref: "#/components/schemas/Address"      
+                   
+      responses:
+        '204':
+          description: Order details updated Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                   type: integer 
+    
+    delete:
+      tags:
+        - Orders
+      summary: Delete Order
+      description: Delete Order deatils from amazon shopping
+      parameters:
+       - $ref: "#/components/parameters/orderIdQueryParam"
+      responses:
+       '204':
+         description: Order  details cancelled successfully
+    get:
+      tags:
+        - Orders
+      summary: get order details
+      description: get order details from Amazon
+      operationId: getOrderdetails
+      parameters:
+        - $ref: "#/components/parameters/orderIdQueryParam"
+      responses:
+        '205':
+          description: fetch order details successfully
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                  products:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Products"
+               
+                  Address:
+                    $ref: "#/components/schemas/Address"
+components:
+  parameters:
+   orderIdQueryParam:
+     name: orderId
+     in: query
+     required: true
+     schema:
+       type: integer
+  schemas:
+    Address:
+      type: object
+      properties: 
+        addressLine: 
+          type: string
+        city: 
+          type: string
+        state: 
+          type: string
+        zipcode:
+          type: string              
+       
+    Products:
+      type: object 
+      properties: 
+        productId:
+          type: integer
+        name: 
+          type: string
+        price:  
+          type: number
+        categoryName:
+          type: string
+        quantity:
+          type: integer
+          description: |
+            ***Quantity*** represents 'stock' value when this field is being sent by Amazon. Where as in the scenarios of consumer sending this field, it represents 'number of products items' inside the door. Consumers are expected to handle the scenario of stopping the end user <u>*when the stock value is 0*</u>
+            
+            
+  
+
+
+
+            
+                 
+     
+  
+      
+           
+             
+            
+        
+                   
+                
+           
+            
+           
